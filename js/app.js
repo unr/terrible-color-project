@@ -1,4 +1,9 @@
 window.onload = function() {
+
+
+
+
+	// Actually create our 'TrianglesJs' instance.
 	function createTriangles() {
 		this.canvas = document.getElementById('triangleExample');
 		this.triWidth = 300; // width of tri cell
@@ -13,6 +18,7 @@ window.onload = function() {
 		this.points = [];
 		this.paths = [];
 		this.coordinates = [];
+		this.colors = [];
 		this.delaunay = null;
 
 		// Generate a grid of points, based on canvas height/width && variance offset
@@ -72,11 +78,18 @@ window.onload = function() {
 			}
 		}
 
+		// TODO make this chroma scale thing... a property? include it yourself? not sure yet...
+		this.generateColorScale = function generateColorScale() {
+			const scale = chroma.scale(['2B2249', '3D213E']);
+			// return the amount of colors based on tris being shown
+			this.colors = scale.colors(this.coordinates.length);
+		}
+
 		this.render = function render() {
 			// generate our points from canvas width/height & variance
 			this.generatePoints();
-
 			this.generateTriangleCoordinates();
+			this.generateColorScale();
 
 			// Stolen from Paper.js Voronoi example
 			// http://paperjs.org/examples/voronoi/
@@ -84,11 +97,12 @@ window.onload = function() {
 
 			// based on generateTriangleCoordinates renders the triangles in paper.js
 			for (var i = 0; i < this.coordinates.length; i += 1) {
+				console.log('color?? '+this.colors[i]);
 				var triPath = new paper.Path({
 					segments: this.coordinates[i],
-					fillColor: 'black',
+					fillColor: this.colors[i],
 					closed: true,
-					selected: true,
+					strokeWidth: 0,
 				});
 			}
 
