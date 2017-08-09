@@ -8,7 +8,7 @@ window.onload = function() {
 		this.canvas = document.getElementById('triangleExample');
 		this.triWidth = 300; // width of tri cell
 		this.triHeight = 225; // height of tri cell
-		this.variance = 40; // variance to randomize cell points
+		this.variance = 100; // variance to randomize cell points
 
 		// setup paper global instance with this canvas
 		// We're not using paperscript, so its properties are not global.
@@ -80,7 +80,7 @@ window.onload = function() {
 
 		// TODO make this chroma scale thing... a property? include it yourself? not sure yet...
 		this.generateColorScale = function generateColorScale() {
-			const scale = chroma.scale(['2B2249', '3D213E']);
+			const scale = chroma.scale(['391E44', '6F5975']);
 			// return the amount of colors based on tris being shown
 			this.colors = scale.colors(this.coordinates.length);
 		}
@@ -97,7 +97,6 @@ window.onload = function() {
 
 			// based on generateTriangleCoordinates renders the triangles in paper.js
 			for (var i = 0; i < this.coordinates.length; i += 1) {
-				console.log('color?? '+this.colors[i]);
 				var triPath = new paper.Path({
 					segments: this.coordinates[i],
 					fillColor: this.colors[i],
