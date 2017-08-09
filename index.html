@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delaunter Experiment in Paper.js</title>
+    <style>
+		canvas {
+			width: 600px;
+			height: 500px;
+			border: solid 3px black;
+			margin: 32px;
+		}
+    </style>
+</head>
+<body>
+	<canvas id='triangleExample' resize></canvas>
+
+	<!-- lazy way to let delaunter exist in browser -->
+	<script>var module = {};</script>
+
+	<script src='node_modules/delaunator/index.js'></script>
+	<script src='node_modules/paper/dist/paper-full.js'></script>
+	<script src='js/app.js'></script>
+</body>
+</html>
