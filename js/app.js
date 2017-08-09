@@ -1,12 +1,9 @@
 window.onload = function() {
-	console.group('are we ready?');
-	console.log(Delaunator);
-	console.log(paper);
-	console.groupEnd();
-
 	function createTriangles() {
 		this.canvas = document.getElementById('triangleExample');
-		this.variance = 20;
+		this.triWidth = 300; // width of tri cell
+		this.triHeight = 225; // height of tri cell
+		this.variance = 40; // variance to randomize cell points
 
 		// setup paper global instance with this canvas
 		// We're not using paperscript, so its properties are not global.
@@ -22,18 +19,43 @@ window.onload = function() {
 		// if touching the edge (0, maxHeight/width) do not apply variance
 		// Otherwise, apply random amount of variance?
 		this.generatePoints = function generatePoints() {
-			this.points = [
-				// OG Points example...
-				// [0, 0], [200, 0], [400, 0], [600, 0],
-				// [0, 250], [200, 250], [400, 250], [600, 250],
-				// [0, 500], [200, 500], [400, 500], [600, 500],
-				// Points with "Variance" example
-				[0, 0], [200, 0], [400, 0], [600, 0],
-				[0, 260], [220, 240], [430, 280], [600, 220],
-				[0, 500], [190, 500], [390, 500], [600, 500],
-			];
+			const width = this.canvas.offsetWidth;
+			const height = this.canvas.offsetHeight;
+
+			// determine how many tri's we need to iterate over, to fill the canvas
+			const rows = Math.ceil(height / this.triHeight);
+			const cols = Math.ceil(width / this.triWidth);
+
+			// reset points
+			this.points = [];
+
+			// loop over rows
+			for (var row = 0; row <= rows; row += 1) {
+				var point = [0, 0];
+
+				// each row needs each column
+				for (var col = 0; col <= cols; col += 1) {
+					var x = col * this.triWidth;
+					var y = row * this.triHeight;
+
+					// If point is considered 'within the canvas', apply variance
+					if (x > this.variance && x < (width - this.variance)) x += this.randomVariance();
+					if (y > this.variance && y < (height - this.variance)) y += this.randomVariance();
+
+					this.points.push([x, y]);
+				}
+			}
 		}
 
+		// Randomly gets positive/negative amount of variance
+		// up to the maximum specified variance
+		this.randomVariance = function randomVariance() {
+			var max = 0 + this.variance;
+			var min = 0 - this.variance;
+			return Math.floor(Math.random() * (max - min + 1)) + min;
+		}
+
+		// Based on existing points array, generate Delaunator of points for tri coordinates
 		this.generateTriangleCoordinates = function generateTriangleCoordinates() {
 			// set our delaunay instance for tris
 			const delaunay = new Delaunator(this.points);
@@ -62,7 +84,6 @@ window.onload = function() {
 
 			// based on generateTriangleCoordinates renders the triangles in paper.js
 			for (var i = 0; i < this.coordinates.length; i += 1) {
-				console.log(this.coordinates[i]);
 				var triPath = new paper.Path({
 					segments: this.coordinates[i],
 					fillColor: 'black',
@@ -80,4 +101,6 @@ window.onload = function() {
 	console.group('Triangles created!');
 	console.log(triangles);
 	console.groupEnd();
+
+	triangles.render();
 }
