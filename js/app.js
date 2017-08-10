@@ -20,6 +20,7 @@ window.onload = function() {
 		this.coordinates = [];
 		this.colors = [];
 		this.trianglesGroup = null;
+		this.hoveredTrianglesGroup = null;
 		this.overlayGroup = null;
 		this.delaunay = null;
 
@@ -108,53 +109,36 @@ window.onload = function() {
 		}
 
 		this.generateShine = function generateShine() {
-			var shine = new paper.Path.Circle({
-				center: paper.project.view.center,
-				radius: 450,
-				blendMode: 'overlay',
-			});
-			/**
-			shine.fillColor = {
-				gradient: {
-					stops: [
-						[new paper.Color(255, 255, 255, 0.4), 0.05],
-						[new paper.Color(255, 255, 255, 0.3), 0.25],
-						[new paper.Color(255, 255, 255, 0.2), 0.4],
-						[new paper.Color(255, 255, 255, 0), 0.85]],
-					radial: true,
-				},
-				origin: shine.position,
-				destination: shine.bounds.rightCenter,
-			};
-			*/
-
-			this.shineGroup = new paper.Group([shine]);
-
 			paper.project.view.onMouseMove = function(event) {
-				shine.position = event.point;
+				this.hoveredTrianglesGroup.children.forEach(function (child) {
+					child.opacity = 0;
+				});
 
-				const hoveredItems = this.trianglesGroup.hitTestAll(event.point, {
+				const hoveredItems = this.hoveredTrianglesGroup.hitTestAll(event.point, {
 					fill: true,
 					stroke: true,
 					segments: true,
 					class: paper.Path,
-					tolerance: 2,
+					tolerance: 200,
 				});
-				console.log(hoveredItems);
 
 				hoveredItems.forEach(function (hoveredItem) {
-					hoveredItem.item.fillColor = 'red';
+					hoveredItem.item.opacity = 1;
 				});
 			}.bind(this);
 		}
 
 		this.generateTriangles = function generateTriangles() {
 			const tris = [];
+			const hoverTris = [];
 
 			// based on generateTriangleCoordinates renders the triangles in paper.js
 			for (var i = 0; i < this.coordinates.length; i += 1) {
 				const triColor = new paper.Color(this.colors[i]);
-				const triColorTwo = triColor.clone().brightness = triColor.brightness - 0.05;
+				const triColorTwo = triColor.clone();
+				console.log(triColorTwo.toString());
+				triColorTwo.brightness = triColor.brightness - 0.05;
+				console.log(triColorTwo.toString());
 				const tri = new paper.Path({
 					segments: this.coordinates[i],
 					closed: true,
@@ -171,10 +155,30 @@ window.onload = function() {
 					destination: tri.bounds.bottomRight,
 				};
 
+				// push our triangle to visible layer
 				tris.push(tri);
+
+				// make a duplicate that is shinier, and put it on layer above.
+				// to be shown on hover.
+				const hoverTri = tri.clone();
+				const hoverTriColor = triColor.clone();
+				hoverTriColor.brightness = triColor.brightness + 0.02;
+
+				hoverTri.opacity = 0;
+				hoverTri.fillColor = {
+					stops: [
+						[hoverTriColor, 0.6],
+						[triColorTwo, 0.9],
+					],
+					origin: tri.bounds.topCenter,
+					destination: tri.bounds.bottomRight,
+				};
+
+				hoverTris.push(hoverTri);
 			}
 
 			this.trianglesGroup = new paper.Group(tris);
+			this.hoveredTrianglesGroup = new paper.Group(hoverTris);
 		}
 
 		this.render = function render() {
