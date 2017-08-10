@@ -138,13 +138,27 @@ window.onload = function() {
 
 			// based on generateTriangleCoordinates renders the triangles in paper.js
 			for (var i = 0; i < this.coordinates.length; i += 1) {
-				tris.push(new paper.Path({
+				const triColor = new paper.Color(this.colors[i]);
+				const triColorTwo = triColor.clone().brightness = triColor.brightness - 0.05;
+				const tri = new paper.Path({
 					segments: this.coordinates[i],
-					fillColor: this.colors[i],
 					closed: true,
 					strokeWidth: 1,
 					strokeColor: this.colors[i],
-				}));
+				});
+
+				tri.fillColor = {
+					stops: [
+						[triColor, 0.6],
+						[triColorTwo, 0.9],
+					],
+					origin: tri.bounds.topCenter,
+					destination: tri.bounds.bottomRight,
+				};
+
+				console.log([tri.bounds.topCenter, tri.bounds.bottomCenter]);
+
+				tris.push(tri);
 			}
 
 			this.trianglesGroup = new paper.Group(tris);
