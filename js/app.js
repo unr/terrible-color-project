@@ -6,9 +6,9 @@ window.onload = function() {
 	// Actually create our 'TrianglesJs' instance.
 	function createTriangles() {
 		this.canvas = document.getElementById('triangleExample');
-		this.triWidth = 300; // width of tri cell
-		this.triHeight = 225; // height of tri cell
-		this.variance = 100; // variance to randomize cell points
+		this.triWidth = 270; // width of tri cell
+		this.triHeight = 315; // height of tri cell
+		this.variance = 90; // variance to randomize cell points
 
 		// setup paper global instance with this canvas
 		// We're not using paperscript, so its properties are not global.
@@ -19,6 +19,8 @@ window.onload = function() {
 		this.paths = [];
 		this.coordinates = [];
 		this.colors = [];
+		this.trianglesGroup = null;
+		this.overlayGroup = null;
 		this.delaunay = null;
 
 		// Generate a grid of points, based on canvas height/width && variance offset
@@ -85,27 +87,81 @@ window.onload = function() {
 			this.colors = scale.colors(this.coordinates.length);
 		}
 
-		this.render = function render() {
-			// generate our points from canvas width/height & variance
-			this.generatePoints();
-			this.generateTriangleCoordinates();
-			this.generateColorScale();
+		this.generateOverlay = function generateOverlay() {
+			var rect = new paper.Path.Rectangle({
+				from: [0, 0],
+				to: [this.canvas.offsetWidth, this.canvas.offsetHeight],
+				blendMode: 'overlay',
+				fillColor: {
+					gradient: {
+						stops: ['#2E1749', '#D32E4C'],
+					},
+					origin: [0, 0],
+					destination: [this.canvas.offsetWidth, this.canvas.offsetHeight],
+				},
 
+				// blend modes
+				// 'normal', 'multiply', 'screen', 'overlay', 'soft-light', 'hard- light', 'color-dodge', 'color-burn', 'darken', 'lighten', 'difference', 'exclusion', 'hue', 'saturation', 'luminosity', 'color', 'add', 'subtract', 'average', 'pin-light', 'negation', 'source- over', 'source-in', 'source-out', 'source-atop', 'destination-over', 'destination-in', 'destination-out', 'destination-atop', 'lighter', 'darker', 'copy', 'xor'
+			});
+
+			this.overlayGroup = new paper.Group([rect]);
+		}
+
+		this.generateShine = function generateShine() {
+			var shine = new paper.Path.Circle({
+				center: paper.project.view.center,
+				radius: 450,
+				blendMode: 'overlay',
+			});
+			shine.fillColor = {
+				gradient: {
+					stops: [
+						[new paper.Color(255, 255, 255, 0.4), 0.05],
+						[new paper.Color(255, 255, 255, 0.3), 0.25],
+						[new paper.Color(255, 255, 255, 0.2), 0.4],
+						[new paper.Color(255, 255, 255, 0), 0.85]],
+					radial: true,
+				},
+				origin: shine.position,
+				destination: shine.bounds.rightCenter,
+			};
+
+			this.shineGroup = new paper.Group([shine]);
+
+			paper.project.view.onMouseMove = function(event) {
+				shine.position = event.point;
+			}
+		}
+
+		this.generateTriangles = function generateTriangles() {
+			const tris = [];
+
+			// based on generateTriangleCoordinates renders the triangles in paper.js
+			for (var i = 0; i < this.coordinates.length; i += 1) {
+				tris.push(new paper.Path({
+					segments: this.coordinates[i],
+					fillColor: this.colors[i],
+					closed: true,
+					strokeWidth: 1,
+					strokeColor: this.colors[i],
+				}));
+			}
+
+			this.trianglesGroup = new paper.Group(tris);
+		}
+
+		this.render = function render() {
 			// Stolen from Paper.js Voronoi example
 			// http://paperjs.org/examples/voronoi/
 			paper.project.activeLayer.children = [];
 
-			// based on generateTriangleCoordinates renders the triangles in paper.js
-			for (var i = 0; i < this.coordinates.length; i += 1) {
-				var triPath = new paper.Path({
-					segments: this.coordinates[i],
-					fillColor: this.colors[i],
-					closed: true,
-					strokeWidth: 0,
-				});
-			}
-
-
+			// generate our points from canvas width/height & variance
+			this.generatePoints();
+			this.generateTriangleCoordinates();
+			this.generateColorScale();
+			this.generateTriangles();
+			this.generateOverlay();
+			this.generateShine();
 		}
 	}
 

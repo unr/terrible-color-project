@@ -15,10 +15,25 @@
 			border: solid 3px black;
 			box-sizing: border-box;
 			background: #2B2249;
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			z-index: 1;
+		}
+
+		img {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translateX(-50%) translateY(-50%);
+			z-index: 2;
 		}
     </style>
 </head>
 <body>
+	<img src='lootleague.png' />
 	<canvas id='triangleExample' resize></canvas>
 
 	<!-- lazy way to let delaunter exist in browser -->
