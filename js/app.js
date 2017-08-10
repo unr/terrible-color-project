@@ -113,6 +113,7 @@ window.onload = function() {
 				radius: 450,
 				blendMode: 'overlay',
 			});
+			/**
 			shine.fillColor = {
 				gradient: {
 					stops: [
@@ -125,12 +126,26 @@ window.onload = function() {
 				origin: shine.position,
 				destination: shine.bounds.rightCenter,
 			};
+			*/
 
 			this.shineGroup = new paper.Group([shine]);
 
 			paper.project.view.onMouseMove = function(event) {
 				shine.position = event.point;
-			}
+
+				const hoveredItems = this.trianglesGroup.hitTestAll(event.point, {
+					fill: true,
+					stroke: true,
+					segments: true,
+					class: paper.Path,
+					tolerance: 2,
+				});
+				console.log(hoveredItems);
+
+				hoveredItems.forEach(function (hoveredItem) {
+					hoveredItem.item.fillColor = 'red';
+				});
+			}.bind(this);
 		}
 
 		this.generateTriangles = function generateTriangles() {
@@ -155,8 +170,6 @@ window.onload = function() {
 					origin: tri.bounds.topCenter,
 					destination: tri.bounds.bottomRight,
 				};
-
-				console.log([tri.bounds.topCenter, tri.bounds.bottomCenter]);
 
 				tris.push(tri);
 			}
